@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="CrowGames는 브라우저에서 바로 즐길 수 있는 캐주얼 게임 모음입니다."
+    />
+    <meta property="og:title" content="CrowGames" />
+    <meta
+      property="og:description"
+      content="테트리스와 지뢰찾기부터 시작하는 웹 게임 아케이드."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://games.iamchang.me" />
+    <title>CrowGames</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header" aria-label="CrowGames">
+      <a class="brand" href="/" aria-label="CrowGames home">
+        <span class="brand-mark" aria-hidden="true">CG</span>
+        <span>CrowGames</span>
+      </a>
+      <nav class="top-nav" aria-label="게임 바로가기">
+        <a href="#games">Games</a>
+        <a href="https://games.iamchang.me">games.iamchang.me</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="page-title">
+        <div class="hero-copy">
+          <p class="eyebrow">Browser Arcade</p>
+          <h1 id="page-title">CrowGames</h1>
+          <p class="hero-text">
+            가볍게 열고, 바로 플레이하는 웹 게임 모음. 지금은 두 개의 게임으로
+            시작하지만 새 게임을 계속 얹을 수 있게 만들었습니다.
+          </p>
+          <div class="hero-actions" aria-label="대표 게임">
+            <a class="primary-action" href="CETRIS/">CETRIS 플레이</a>
+            <a class="secondary-action" href="CrowMineSweeper/">지뢰찾기 플레이</a>
+          </div>
+        </div>
+        <div class="hero-machine" aria-hidden="true">
+          <div class="machine-top">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <div class="machine-screen">
+            <div class="tetromino t1"></div>
+            <div class="tetromino t2"></div>
+            <div class="tetromino t3"></div>
+            <div class="mine-grid">
+              <span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="games-section" id="games" aria-labelledby="games-title">
+        <div class="section-heading">
+          <p class="eyebrow">Collection</p>
+          <h2 id="games-title">게임 목록</h2>
+        </div>
+
+        <div class="game-grid">
+          <article class="game-card">
+            <a class="game-link" href="CETRIS/" aria-label="CETRIS 플레이">
+              <div class="game-preview cetris-preview" aria-hidden="true">
+                <div class="preview-board">
+                  <span class="block cyan"></span>
+                  <span class="block cyan"></span>
+                  <span class="block cyan"></span>
+                  <span class="block cyan"></span>
+                  <span class="block pink"></span>
+                  <span class="block pink"></span>
+                  <span class="block green"></span>
+                  <span class="block green"></span>
+                  <span class="block yellow"></span>
+                  <span class="block yellow"></span>
+                  <span class="block blue"></span>
+                  <span class="block blue"></span>
+                </div>
+              </div>
+              <div class="game-content">
+                <p class="game-kicker">Block puzzle</p>
+                <h3>CETRIS</h3>
+                <p>
+                  홀드, 다음 블록, 보드 크기 조절, 사운드를 갖춘 모던 테트리스
+                  스타일 게임입니다.
+                </p>
+                <span class="play-label">플레이하기</span>
+              </div>
+            </a>
+          </article>
+
+          <article class="game-card">
+            <a
+              class="game-link"
+              href="CrowMineSweeper/"
+              aria-label="CrowMineSweeper 플레이"
+            >
+              <div class="game-preview mine-preview" aria-hidden="true">
+                <div class="retro-window">
+                  <div class="retro-bar"></div>
+                  <div class="retro-score">
+                    <span>040</span>
+                    <span>:)</span>
+                    <span>000</span>
+                  </div>
+                  <div class="retro-board">
+                    <span></span><span></span><span class="open">1</span><span></span>
+                    <span class="open">1</span><span class="open">2</span><span></span><span></span>
+                    <span></span><span></span><span></span><span class="open">2</span>
+                  </div>
+                </div>
+              </div>
+              <div class="game-content">
+                <p class="game-kicker">Classic puzzle</p>
+                <h3>CrowMineSweeper</h3>
+                <p>
+                  난이도 선택, 커스텀 보드, 타이머, 모바일 깃발 모드를 포함한
+                  클래식 지뢰찾기입니다.
+                </p>
+                <span class="play-label">플레이하기</span>
+              </div>
+            </a>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>games.iamchang.me</span>
+      <span>새 게임은 폴더를 추가하고 이 목록에 카드만 더하면 됩니다.</span>
+    </footer>
+  </body>
+</html>

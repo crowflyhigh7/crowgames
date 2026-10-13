@@ -1,0 +1,415 @@
+/* 고전 윈도우 스타일 레트로 CSS */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+body {
+  background-color: #008080; /* 클래식 윈도우 청록색 바탕 */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 16px;
+  overflow-x: auto;
+}
+
+/* 윈도우 프레임 */
+.window-container {
+  background: #c0c0c0;
+  border-top: 3px solid #ffffff;
+  border-left: 3px solid #ffffff;
+  border-right: 3px solid #7b7b7b;
+  border-bottom: 3px solid #7b7b7b;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4);
+  max-width: 98vw;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 상단 타이틀바 */
+.title-bar {
+  background: linear-gradient(90deg, #000080, #1084d0);
+  color: white;
+  padding: 3px 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+}
+
+.title-bar-text {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.title-bar-controls {
+  display: flex;
+  gap: 3px;
+}
+
+.title-bar-controls button {
+  width: 18px;
+  height: 16px;
+  background: #c0c0c0;
+  border-top: 1px solid #ffffff;
+  border-left: 1px solid #ffffff;
+  border-right: 1px solid #7b7b7b;
+  border-bottom: 1px solid #7b7b7b;
+  font-size: 10px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.title-bar-controls button:active {
+  border-top: 1px solid #7b7b7b;
+  border-left: 1px solid #7b7b7b;
+  border-right: 1px solid #ffffff;
+  border-bottom: 1px solid #ffffff;
+}
+
+/* 메뉴 및 컨트롤 바 */
+.menu-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 6px 8px;
+  background: #c0c0c0;
+  border-bottom: 2px solid #7b7b7b;
+  font-size: 13px;
+}
+
+.difficulty-select-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.difficulty-select-group select {
+  padding: 3px 6px;
+  background: #ffffff;
+  border-top: 1px solid #7b7b7b;
+  border-left: 1px solid #7b7b7b;
+  border-right: 1px solid #ffffff;
+  border-bottom: 1px solid #ffffff;
+  font-size: 13px;
+  outline: none;
+  cursor: pointer;
+}
+
+.menu-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.menu-btn {
+  background: #c0c0c0;
+  border-top: 2px solid #ffffff;
+  border-left: 2px solid #ffffff;
+  border-right: 2px solid #7b7b7b;
+  border-bottom: 2px solid #7b7b7b;
+  padding: 3px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.menu-btn:active, .menu-btn.active {
+  border-top: 2px solid #7b7b7b;
+  border-left: 2px solid #7b7b7b;
+  border-right: 2px solid #ffffff;
+  border-bottom: 2px solid #ffffff;
+  background: #e0e0e0;
+}
+
+/* 사용자 지정 패널 */
+.custom-panel {
+  padding: 8px 12px;
+  background: #d8d8d8;
+  border-bottom: 2px solid #7b7b7b;
+  font-size: 13px;
+}
+
+.custom-panel.hidden {
+  display: none;
+}
+
+.custom-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.custom-row input {
+  width: 55px;
+  padding: 2px 4px;
+  border: 1px solid #7b7b7b;
+  font-size: 13px;
+}
+
+.custom-error-text {
+  color: #c00000;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.retro-btn {
+  background: #c0c0c0;
+  border-top: 2px solid #ffffff;
+  border-left: 2px solid #ffffff;
+  border-right: 2px solid #7b7b7b;
+  border-bottom: 2px solid #7b7b7b;
+  padding: 3px 12px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.retro-btn:active {
+  border-top: 2px solid #7b7b7b;
+  border-left: 2px solid #7b7b7b;
+  border-right: 2px solid #ffffff;
+  border-bottom: 2px solid #ffffff;
+}
+
+/* 메인 윈도우 바디 */
+.window-body {
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* 상단 스코어보드 (지뢰 카운터, 스마일, 타이머) */
+.scoreboard-bevel {
+  background: #c0c0c0;
+  border-top: 3px solid #7b7b7b;
+  border-left: 3px solid #7b7b7b;
+  border-right: 3px solid #ffffff;
+  border-bottom: 3px solid #ffffff;
+  padding: 6px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* 디지털 7-세그먼트 LED 디스플레이 */
+.digital-display {
+  background-color: #000000;
+  color: #ff0000;
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: 900;
+  font-size: 26px;
+  letter-spacing: 2px;
+  line-height: 1;
+  padding: 2px 6px;
+  border-top: 2px solid #7b7b7b;
+  border-left: 2px solid #7b7b7b;
+  border-right: 2px solid #ffffff;
+  border-bottom: 2px solid #ffffff;
+  min-width: 60px;
+  text-align: right;
+  text-shadow: 0 0 4px rgba(255, 0, 0, 0.6);
+}
+
+/* 스마일 리셋 버튼 */
+.face-btn {
+  width: 36px;
+  height: 36px;
+  background: #c0c0c0;
+  border-top: 3px solid #ffffff;
+  border-left: 3px solid #ffffff;
+  border-right: 3px solid #7b7b7b;
+  border-bottom: 3px solid #7b7b7b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  cursor: pointer;
+  outline: none;
+}
+
+.face-btn:active, .face-btn.pressed {
+  border-top: 3px solid #7b7b7b;
+  border-left: 3px solid #7b7b7b;
+  border-right: 3px solid #ffffff;
+  border-bottom: 3px solid #ffffff;
+  padding-top: 2px;
+  padding-left: 2px;
+}
+
+/* 게임 보드 외곽 음각 베벨 */
+.board-bevel {
+  border-top: 3px solid #7b7b7b;
+  border-left: 3px solid #7b7b7b;
+  border-right: 3px solid #ffffff;
+  border-bottom: 3px solid #ffffff;
+  background: #7b7b7b;
+  overflow: auto;
+  max-height: calc(85vh - 150px);
+  max-width: 95vw;
+}
+
+/* 지뢰찾기 그리드 보드 */
+.board {
+  display: grid;
+  background-color: #7b7b7b;
+  gap: 0;
+  width: fit-content;
+  margin: 0 auto;
+}
+
+/* 개별 타일 (블록) */
+.tile {
+  width: 25px;
+  height: 25px;
+  background-color: #c0c0c0;
+  border-top: 3px solid #ffffff;
+  border-left: 3px solid #ffffff;
+  border-right: 3px solid #7b7b7b;
+  border-bottom: 3px solid #7b7b7b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 16px;
+  font-family: 'Arial Black', Arial, sans-serif;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+/* 열린 타일 */
+.tile.revealed {
+  background-color: #bdbdbd;
+  border: 1px solid #7b7b7b;
+  cursor: default;
+}
+
+/* 타일 마우스다운 / 임시 눌림 효과 */
+.tile.pressed {
+  background-color: #bdbdbd;
+  border: 1px solid #7b7b7b;
+}
+
+/* 깃발 타일 */
+.tile.flagged {
+  font-size: 14px;
+}
+
+/* 잘못 꽂은 깃발 (게임 오버 시) */
+.tile.wrong-flag {
+  position: relative;
+  background-color: #bdbdbd;
+  border: 1px solid #7b7b7b;
+}
+
+.tile.wrong-flag::after {
+  content: '❌';
+  position: absolute;
+  font-size: 12px;
+}
+
+/* 폭발한 지뢰 (패배 원인 지뢰) */
+.tile.exploded {
+  background-color: #ff0000 !important;
+  border: 1px solid #7b7b7b;
+}
+
+/* 숫자별 고전 윈도우 시그니처 색상 */
+.tile[data-count="1"] { color: #0000ff; } /* 1: 파랑 */
+.tile[data-count="2"] { color: #008000; } /* 2: 초록 */
+.tile[data-count="3"] { color: #ff0000; } /* 3: 빨강 */
+.tile[data-count="4"] { color: #000080; } /* 4: 짙은 파랑 / 남색 */
+.tile[data-count="5"] { color: #800000; } /* 5: 적갈색 */
+.tile[data-count="6"] { color: #008080; } /* 6: 청록 */
+.tile[data-count="7"] { color: #000000; } /* 7: 검정 */
+.tile[data-count="8"] { color: #808080; } /* 8: 회색 */
+
+/* 하단 상태바 */
+.status-bar {
+  padding: 4px 8px;
+  font-size: 11px;
+  color: #404040;
+  border-top: 1px solid #ffffff;
+  background: #c0c0c0;
+}
+
+/* 모달 대화상자 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal-overlay.hidden {
+  display: none;
+}
+
+.modal-dialog {
+  background: #c0c0c0;
+  border-top: 3px solid #ffffff;
+  border-left: 3px solid #ffffff;
+  border-right: 3px solid #7b7b7b;
+  border-bottom: 3px solid #7b7b7b;
+  box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.5);
+  width: 320px;
+}
+
+.modal-content {
+  padding: 16px;
+  font-size: 14px;
+}
+
+.modal-stats {
+  margin: 12px 0;
+  padding: 8px;
+  background: #e8e8e8;
+  border: 1px inset #7b7b7b;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+/* 모바일 전용 UI */
+@media (max-width: 600px) {
+  body {
+    padding: 6px;
+  }
+
+  .tile {
+    width: 28px;
+    height: 28px;
+    font-size: 15px;
+  }
+
+  .status-bar {
+    font-size: 10px;
+  }
+}

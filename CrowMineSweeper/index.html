@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>클래식 지뢰찾기 (Classic Minesweeper)</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="window-container">
+    <!-- 윈도우 타이틀 바 -->
+    <div class="title-bar">
+      <div class="title-bar-text">
+        <span class="icon">💣</span> 지뢰찾기 (Minesweeper)
+      </div>
+      <div class="title-bar-controls">
+        <button aria-label="Minimize">_</button>
+        <button aria-label="Maximize">□</button>
+        <button aria-label="Close">✕</button>
+      </div>
+    </div>
+
+    <!-- 메뉴 & 설정 바 -->
+    <div class="menu-bar">
+      <div class="difficulty-select-group">
+        <label for="difficulty-select"><strong>난이도:</strong></label>
+        <select id="difficulty-select">
+          <option value="beginner">초급 (9 × 9, 지뢰 10개)</option>
+          <option value="intermediate" selected>중급 (16 × 16, 지뢰 40개)</option>
+          <option value="expert">고급 (30 × 16, 지뢰 99개)</option>
+          <option value="custom">사용자 지정...</option>
+        </select>
+      </div>
+
+      <div class="menu-actions">
+        <button id="sound-toggle-btn" class="menu-btn" title="소리 켜기/끄기">🔊 소리 켜짐</button>
+        <button id="flag-mode-btn" class="menu-btn mobile-only" title="터치/모바일용 깃발 모드 토글">🚩 깃발 모드: OFF</button>
+      </div>
+    </div>
+
+    <!-- 사용자 지정 난이도 설정 창 (커스텀 선택 시 표시) -->
+    <div id="custom-settings-panel" class="custom-panel hidden">
+      <div class="custom-row">
+        <label>가로(너비): <input type="number" id="custom-width" min="8" max="50" value="20"></label>
+        <label>세로(높이): <input type="number" id="custom-height" min="8" max="30" value="15"></label>
+        <label>지뢰 개수: <input type="number" id="custom-mines" min="1" max="500" value="35"></label>
+        <button id="custom-apply-btn" class="retro-btn">적용하기</button>
+      </div>
+      <div id="custom-error" class="custom-error-text"></div>
+    </div>
+
+    <!-- 지뢰찾기 메인 게임 창 바디 -->
+    <div class="window-body">
+      <!-- 상태창 (헤더: 남은 지뢰 수, 스마일 리셋 버튼, 타이머) -->
+      <div class="scoreboard-bevel">
+        <!-- 7-Segment 스타일 지뢰 카운터 -->
+        <div class="digital-display" id="mine-counter" aria-label="남은 지뢰 수">040</div>
+
+        <!-- 스마일 리셋 버튼 -->
+        <button class="face-btn" id="face-btn" aria-label="게임 재시작">
+          <span id="face-emoji">🙂</span>
+        </button>
+
+        <!-- 7-Segment 스타일 타이머 -->
+        <div class="digital-display" id="timer" aria-label="경과 시간">000</div>
+      </div>
+
+      <!-- 게임 보드 영역 -->
+      <div class="board-bevel" id="board-container">
+        <div id="mine-board" class="board"></div>
+      </div>
+    </div>
+
+    <!-- 하단 조작 안내 상태 표시줄 -->
+    <div class="status-bar">
+      <span id="status-message">좌클릭: 블록 열기 | 우클릭: 깃발 꽂기 | 숫자 더블클릭/양클릭: 주변 일괄 열기</span>
+    </div>
+  </div>
+
+  <!-- 결과 알림 모달 (승리 / 패배) -->
+  <div id="game-modal" class="modal-overlay hidden">
+    <div class="modal-dialog">
+      <div class="title-bar">
+        <div class="title-bar-text" id="modal-title">게임 종료</div>
+      </div>
+      <div class="modal-content">
+        <p id="modal-message"></p>
+        <div class="modal-stats" id="modal-stats"></div>
+        <div class="modal-buttons">
+          <button id="modal-restart-btn" class="retro-btn">다시 시작</button>
+          <button id="modal-close-btn" class="retro-btn">보드 보기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="audio.js"></script>
+  <script src="minesweeper.js"></script>
+</body>
+</html>
