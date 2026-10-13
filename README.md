@@ -68,6 +68,8 @@ CLI 배포 후에도 `games.iamchang.me` 커스텀 도메인은 Cloudflare Pages
 
 API 토큰은 Cloudflare Pages 배포 권한이 있는 토큰을 사용하세요.
 
+워크플로는 `crowgames` Pages 프로젝트가 없으면 생성하고, 배포 후 `games.iamchang.me` 커스텀 도메인을 등록합니다. Pages 권한만 있는 토큰은 DNS를 수정하지 못하므로, 최초 연결 시 Cloudflare 대시보드에서 도메인 설정을 완료하거나 `games` CNAME을 배포된 Pages 주소로 연결해야 합니다. 정확한 Pages 주소는 워크플로 로그에 표시됩니다.
+
 ## 새 게임 추가
 
 1. 루트 아래에 새 게임 폴더를 추가합니다.

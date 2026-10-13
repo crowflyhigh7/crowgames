@@ -24,6 +24,12 @@ jobs:
       - name: Prepare site files
         run: npm run build
 
+      - name: Ensure Cloudflare Pages project
+        run: node scripts/cloudflare.mjs project
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
       - name: Deploy
         uses: cloudflare/wrangler-action@v3
         with:
@@ -31,3 +37,9 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: '4.150.0'
           command: pages deploy dist --project-name=crowgames --branch=main
+
+      - name: Register custom domain
+        run: node scripts/cloudflare.mjs domain
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
