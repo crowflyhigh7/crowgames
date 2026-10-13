@@ -4,8 +4,9 @@
   "private": true,
   "description": "Static web game hub for games.iamchang.me.",
   "scripts": {
-    "dev": "npx wrangler pages dev .",
-    "deploy": "npx wrangler pages deploy . --project-name=crowgames --branch=main"
+    "build": "node scripts/build.mjs",
+    "dev": "npm run build && npx wrangler pages dev dist",
+    "deploy": "npm run build && npx wrangler pages deploy dist --project-name=crowgames --branch=main"
   },
   "devDependencies": {
     "wrangler": "^4.0.0"

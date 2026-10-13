@@ -4,7 +4,7 @@
 
 ## 로컬 실행
 
-이 프로젝트는 빌드가 필요 없는 정적 사이트입니다. 루트의 `index.html`을 열거나 Cloudflare Pages 로컬 프리뷰를 사용할 수 있습니다.
+이 프로젝트는 정적 사이트입니다. 루트의 `index.html`을 열거나 Cloudflare Pages 로컬 프리뷰를 사용할 수 있습니다. `npm run build`는 공개 웹 파일과 게임 폴더만 `dist`에 복사합니다. 루트의 메모, 인증 파일, 개발 도구는 배포하지 않습니다.
 
 ```powershell
 npm install
@@ -45,8 +45,8 @@ Cloudflare Dashboard에서 Pages 프로젝트를 만들고 GitHub 저장소를 �
 
 - Project name: `crowgames`
 - Production branch: `main`
-- Build command: 비워둠
-- Build output directory: `/`
+- Build command: `npm run build`
+- Build output directory: `dist`
 
 배포 후 Custom domains에서 `games.iamchang.me`를 추가합니다. 도메인이 Cloudflare에 올라와 있다면 DNS 레코드는 자동으로 연결됩니다.
 
