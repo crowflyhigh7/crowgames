@@ -47,7 +47,15 @@ if (phase === 'project') {
       method: 'POST',
       body: { name: domain },
     });
+  } else if (entry.status !== 'active') {
+    entry = await request(`/${projectName}/domains/${domain}`, { method: 'PATCH' });
   }
   console.log(`Custom domain ${domain}: ${entry.status}.`);
+  console.log(JSON.stringify({
+    verification: entry.verification_data?.status,
+    certificate: entry.validation_data?.status,
+    verificationError: entry.verification_data?.error_message,
+    certificateError: entry.validation_data?.error_message,
+  }));
   console.log(`Required DNS record: CNAME games -> ${project.subdomain}`);
 }
