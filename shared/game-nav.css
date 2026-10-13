@@ -1,0 +1,64 @@
+.crowgames-home {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  gap: 8px;
+  box-sizing: border-box;
+  min-width: 72px;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid #5b687b;
+  border-radius: 6px;
+  background: #161c27;
+  color: #f5f7fa;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.crowgames-home::before {
+  content: '';
+  display: block;
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+  background: currentColor;
+  -webkit-mask: url('./house.svg') center / contain no-repeat;
+  mask: url('./house.svg') center / contain no-repeat;
+}
+
+.crowgames-home:hover {
+  border-color: #ebf0f7;
+  background: #293343;
+}
+
+.crowgames-home:focus-visible {
+  outline: 3px solid #e44581;
+  outline-offset: 3px;
+}
+
+.crowgames-home--retro {
+  border-top: 2px solid #ffffff;
+  border-left: 2px solid #ffffff;
+  border-right: 2px solid #7b7b7b;
+  border-bottom: 2px solid #7b7b7b;
+  border-radius: 0;
+  background: #c0c0c0;
+  color: #202020;
+}
+
+.crowgames-home--retro:hover {
+  border-color: #ffffff #7b7b7b #7b7b7b #ffffff;
+  background: #d8d8d8;
+}
+
+.crowgames-home--retro:active {
+  border-color: #7b7b7b #ffffff #ffffff #7b7b7b;
+  background: #e0e0e0;
+}

@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CETRIS - Modern Arcade Tetris</title>
+  <link rel="stylesheet" href="../shared/game-nav.css" />
   <style>
     :root {
       --bg-dark: #0b0e17;
@@ -35,6 +36,10 @@
     }
 
     .header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
       margin-bottom: 14px;
       text-align: center;
     }
@@ -346,6 +351,7 @@
 
   <header class="header">
     <h1 class="title">CETRIS</h1>
+    <a class="crowgames-home" href="../" aria-label="CrowGames 홈으로" title="CrowGames 홈으로">홈</a>
   </header>
 
   <main class="game-wrapper">
@@ -1244,6 +1250,7 @@
     // 7. Input & UI Event Listeners
     // =========================================================================
     window.addEventListener('keydown', (e) => {
+      if (e.target instanceof Element && e.target.closest('a')) return;
       if (e.target && e.target.tagName === 'INPUT') {
         if (e.code === 'Enter') {
           e.preventDefault();

@@ -15,8 +15,9 @@ mkdirSync(output, { recursive: true });
 for (const name of ['index.html', 'styles.css', '_headers']) {
   cpSync(join(root, name), join(output, name));
 }
+cpSync(join(root, 'shared'), join(output, 'shared'), { recursive: true });
 
-const excluded = new Set(['dist', 'node_modules', 'scripts']);
+const excluded = new Set(['dist', 'node_modules', 'scripts', 'shared']);
 let gameCount = 0;
 for (const entry of readdirSync(root, { withFileTypes: true })) {
   if (!entry.isDirectory() || entry.name.startsWith('.') || excluded.has(entry.name)) {
