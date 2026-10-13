@@ -54,6 +54,13 @@ class Minesweeper {
   }
 
   initEvents() {
+    // Suppress the browser/Windows context menu anywhere inside the game UI.
+    document.addEventListener('contextmenu', (e) => {
+      if (e.target.closest('.window-container, .modal-overlay, #floating-leaderboard-btn')) {
+        e.preventDefault();
+      }
+    }, true);
+
     // 1. 우클릭 컨텍스트 메뉴 브라우저 기본 동작 방지 (가장 중요!)
     this.boardElement.addEventListener('contextmenu', (e) => {
       e.preventDefault(); // 우클릭 팝업 메뉴 차단
