@@ -8,7 +8,21 @@
   <link rel="stylesheet" href="../shared/game-nav.css">
 </head>
 <body oncontextmenu="return false;">
-  <div class="window-container">
+  <div class="minesweeper-layout">
+    <aside class="records-sidebar" aria-label="게임 종류별 기록">
+      <div class="title-bar">
+        <div class="title-bar-text">
+          <span>🏆</span> 보드별 기록
+        </div>
+      </div>
+      <div class="records-sidebar-content">
+        <div id="records-sidebar-list" class="records-sidebar-list">
+          <!-- JS 동적 생성 -->
+        </div>
+      </div>
+    </aside>
+
+    <div class="window-container">
     <!-- 윈도우 타이틀 바 -->
     <div class="title-bar">
       <div class="title-bar-text">
@@ -35,6 +49,7 @@
 
       <div class="menu-actions">
         <a class="crowgames-home crowgames-home--retro" href="../" aria-label="CrowGames 홈으로" title="CrowGames 홈으로">홈</a>
+        <button id="menu-leaderboard-btn" class="menu-btn" title="순위표 보기">🏆 순위표</button>
         <button id="sound-toggle-btn" class="menu-btn" title="소리 켜기/끄기">🔊 소리 켜짐</button>
         <button id="flag-mode-btn" class="menu-btn mobile-only" title="터치/모바일용 깃발 모드 토글">🚩 깃발 모드: OFF</button>
       </div>
@@ -77,20 +92,90 @@
     <div class="status-bar">
       <span id="status-message">좌클릭: 블록 열기 | 우클릭: 깃발 꽂기 | 숫자 더블클릭/양클릭: 주변 일괄 열기</span>
     </div>
+    </div>
   </div>
+
+  <!-- 화면 한 쪽 플로팅 순위표 버튼 -->
+  <button id="floating-leaderboard-btn" class="floating-rank-btn" aria-label="순위표 열기" title="순위표 (명예의 전당)">
+    <span class="rank-icon">🏆</span>
+    <span class="rank-text">순위표</span>
+  </button>
 
   <!-- 결과 알림 모달 (승리 / 패배) -->
   <div id="game-modal" class="modal-overlay hidden">
     <div class="modal-dialog">
       <div class="title-bar">
         <div class="title-bar-text" id="modal-title">게임 종료</div>
+        <div class="title-bar-controls">
+          <button id="modal-title-close-btn" aria-label="닫기">✕</button>
+        </div>
       </div>
       <div class="modal-content">
         <p id="modal-message"></p>
         <div class="modal-stats" id="modal-stats"></div>
+
+        <!-- 승리 시 이름 입력 폼 영역 -->
+        <div id="record-form-section" class="record-form-section hidden">
+          <label for="player-name-input" class="record-input-label"><strong>기록 등록:</strong></label>
+          <div class="record-input-row">
+            <input type="text" id="player-name-input" class="retro-input" maxlength="12" placeholder="플레이어 이름 입력" />
+            <button id="record-submit-btn" class="retro-btn btn-highlight">등록</button>
+          </div>
+          <div id="record-feedback" class="record-feedback"></div>
+        </div>
+
         <div class="modal-buttons">
+          <button id="modal-leaderboard-btn" class="retro-btn">🏆 순위표</button>
           <button id="modal-restart-btn" class="retro-btn">다시 시작</button>
           <button id="modal-close-btn" class="retro-btn">보드 보기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 순위표 (명예의 전당) 모달 -->
+  <div id="leaderboard-modal" class="modal-overlay hidden">
+    <div class="modal-dialog leaderboard-dialog">
+      <div class="title-bar">
+        <div class="title-bar-text">
+          <span>🏆</span> 지뢰찾기 명예의 전당 (순위표)
+        </div>
+        <div class="title-bar-controls">
+          <button id="leaderboard-close-x" aria-label="닫기">✕</button>
+        </div>
+      </div>
+      <div class="modal-content leaderboard-content">
+        <!-- 난이도별 탭 구분 -->
+        <div class="leaderboard-tabs" role="tablist">
+          <button class="tab-btn active" data-tab="beginner">초급</button>
+          <button class="tab-btn" data-tab="intermediate">중급</button>
+          <button class="tab-btn" data-tab="expert">고급</button>
+          <button class="tab-btn" data-tab="custom">사용자 지정</button>
+        </div>
+
+        <!-- 순위 목록 테이블 영역 -->
+        <div class="leaderboard-table-container">
+          <table class="leaderboard-table">
+            <thead>
+              <tr>
+                <th class="col-rank">순위</th>
+                <th class="col-name">이름</th>
+                <th class="col-time">소요 시간</th>
+                <th class="col-date">완료 시각</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboard-tbody">
+              <!-- JS 동적 생성 -->
+            </tbody>
+          </table>
+          <div id="leaderboard-empty" class="leaderboard-empty hidden">
+            아직 등록된 기록이 없습니다.<br>게임을 클리어하고 첫 순위의 주인공이 되어보세요!
+          </div>
+        </div>
+
+        <div class="leaderboard-footer">
+          <button id="leaderboard-clear-btn" class="retro-btn text-danger">현재 난이도 기록 초기화</button>
+          <button id="leaderboard-close-btn" class="retro-btn">닫기</button>
         </div>
       </div>
     </div>

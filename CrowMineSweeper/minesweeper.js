@@ -3,6 +3,205 @@ window.addEventListener('contextmenu', (event) => {
   event.preventDefault();
 }, { capture: true, passive: false });
 
+// 날짜/시간 포맷팅 (년월일 시분초)
+function formatDateTime(date = new Date()) {
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  const hh = String(date.getHours()).padStart(2, '0');
+  const min = String(date.getMinutes()).padStart(2, '0');
+  const ss = String(date.getSeconds()).padStart(2, '0');
+  return `${yyyy}년 ${mm}월 ${dd}일 ${hh}시 ${min}분 ${ss}초`;
+}
+
+function getBoardKey(width, height) {
+  return `${width}x${height}`;
+}
+
+function getBoardLabel(width, height) {
+  return `${width}×${height}`;
+}
+
+function getBoardLabelFromKey(boardKey) {
+  const [width, height] = String(boardKey).split('x');
+  return width && height ? getBoardLabel(width, height) : boardKey;
+}
+
+// 순위표 로컬 스토리지 관리 클래스
+class LeaderboardManager {
+  constructor() {
+    this.storageKey = 'minesweeper_leaderboard_records';
+    this.legacyBoardMap = {
+      beginner: { key: '9x9', label: '9×9' },
+      intermediate: { key: '16x16', label: '16×16' },
+      expert: { key: '30x16', label: '30×16' }
+    };
+  }
+
+  getEmptyRecords() {
+    return { beginner: [], intermediate: [], expert: [], custom: [] };
+  }
+
+  getAllRecords() {
+    try {
+      const data = localStorage.getItem(this.storageKey);
+      if (!data) return this.getEmptyRecords();
+      const parsed = JSON.parse(data);
+      return {
+        ...parsed,
+        beginner: Array.isArray(parsed.beginner) ? parsed.beginner : [],
+        intermediate: Array.isArray(parsed.intermediate) ? parsed.intermediate : [],
+        expert: Array.isArray(parsed.expert) ? parsed.expert : [],
+        custom: Array.isArray(parsed.custom) ? parsed.custom : []
+      };
+    } catch (e) {
+      console.error('순위 데이터 불러오기 오류:', e);
+      return this.getEmptyRecords();
+    }
+  }
+
+  getRecords(mode) {
+    const all = this.getAllRecords();
+    return all[mode] || [];
+  }
+
+  inferBoardFromRecord(record, bucketName) {
+    if (record.boardKey) {
+      return {
+        key: record.boardKey,
+        label: record.boardLabel || record.boardKey.replace('x', '×')
+      };
+    }
+
+    if (this.legacyBoardMap[bucketName]) {
+      return this.legacyBoardMap[bucketName];
+    }
+
+    if (record.boardInfo) {
+      const match = String(record.boardInfo).match(/(\d+)\s*[×x]\s*(\d+)/i);
+      if (match) {
+        return {
+          key: getBoardKey(match[1], match[2]),
+          label: getBoardLabel(match[1], match[2])
+        };
+      }
+    }
+
+    return { key: 'custom', label: '사용자 지정' };
+  }
+
+  normalizeRecord(record, bucketName) {
+    const board = this.inferBoardFromRecord(record, bucketName);
+    return {
+      ...record,
+      boardKey: board.key,
+      boardLabel: board.label
+    };
+  }
+
+  sortRecords(records) {
+    return records.sort((a, b) => {
+      if (a.time !== b.time) return a.time - b.time;
+      return a.timestamp - b.timestamp;
+    });
+  }
+
+  getRecordsForBoardKey(boardKey) {
+    const all = this.getAllRecords();
+    const records = [];
+
+    Object.entries(all).forEach(([bucketName, bucketRecords]) => {
+      if (!Array.isArray(bucketRecords)) return;
+      bucketRecords.forEach((record) => {
+        const normalized = this.normalizeRecord(record, bucketName);
+        if (normalized.boardKey === boardKey) {
+          records.push(normalized);
+        }
+      });
+    });
+
+    return this.sortRecords(records).slice(0, 15);
+  }
+
+  getGroupedRecords() {
+    const all = this.getAllRecords();
+    const groups = new Map();
+
+    Object.entries(all).forEach(([bucketName, bucketRecords]) => {
+      if (!Array.isArray(bucketRecords)) return;
+      bucketRecords.forEach((record) => {
+        const normalized = this.normalizeRecord(record, bucketName);
+        if (!groups.has(normalized.boardKey)) {
+          groups.set(normalized.boardKey, {
+            key: normalized.boardKey,
+            label: normalized.boardLabel,
+            records: []
+          });
+        }
+        groups.get(normalized.boardKey).records.push(normalized);
+      });
+    });
+
+    const standardOrder = ['9x9', '16x16', '30x16'];
+    return Array.from(groups.values())
+      .map((group) => ({
+        ...group,
+        records: this.sortRecords(group.records).slice(0, 5)
+      }))
+      .sort((a, b) => {
+        const aIndex = standardOrder.indexOf(a.key);
+        const bIndex = standardOrder.indexOf(b.key);
+        if (aIndex !== -1 || bIndex !== -1) {
+          if (aIndex === -1) return 1;
+          if (bIndex === -1) return -1;
+          return aIndex - bIndex;
+        }
+        return a.label.localeCompare(b.label, 'ko');
+      });
+  }
+
+  addRecord(mode, record) {
+    const all = this.getAllRecords();
+    if (!all[mode]) all[mode] = [];
+    all[mode].push(record);
+
+    // 정렬: 1순위 소요 시간(초) 오름차순, 2순위 등록 시각(timestamp) 오름차순
+    this.sortRecords(all[mode]);
+
+    // 사용자 지정 보드가 여러 크기로 쌓일 수 있어 넉넉하게 보관한다.
+    all[mode] = all[mode].slice(0, 200);
+
+    try {
+      localStorage.setItem(this.storageKey, JSON.stringify(all));
+    } catch (e) {
+      console.error('순위 데이터 저장 오류:', e);
+    }
+
+    const rank = this.getRecordsForBoardKey(record.boardKey).findIndex(r => r.id === record.id);
+    return rank !== -1 ? rank + 1 : this.getRecordsForBoardKey(record.boardKey).length;
+  }
+
+  clearRecords(mode, boardKey = null) {
+    const all = this.getAllRecords();
+    if (boardKey) {
+      Object.keys(all).forEach((bucketName) => {
+        if (!Array.isArray(all[bucketName])) return;
+        all[bucketName] = all[bucketName].filter((record) => {
+          return this.normalizeRecord(record, bucketName).boardKey !== boardKey;
+        });
+      });
+    } else {
+      all[mode] = [];
+    }
+
+    try {
+      localStorage.setItem(this.storageKey, JSON.stringify(all));
+    } catch (e) {
+      console.error('순위 데이터 초기화 오류:', e);
+    }
+  }
+}
+
 // 지뢰찾기 메인 로직
 class Minesweeper {
   constructor() {
@@ -26,6 +225,13 @@ class Minesweeper {
     this.timer = 0;
     this.timerInterval = null;
     this.mobileFlagMode = false;
+    this.gameEndedAt = null;
+
+    // 순위 관리자
+    this.leaderboard = new LeaderboardManager();
+    this.currentLeaderboardTab = 'intermediate';
+    this.leaderboardBoardKeyOverride = null;
+    this.lastSubmittedRecordId = null;
 
     // 마우스 양클릭(Chord) 상태 추적
     this.mouseButtons = 0;
@@ -46,13 +252,35 @@ class Minesweeper {
     this.soundToggleBtn = document.getElementById('sound-toggle-btn');
     this.flagModeBtn = document.getElementById('flag-mode-btn');
 
-    // 모달 DOM
+    // 플로팅 및 메뉴 순위 버튼
+    this.floatingLeaderboardBtn = document.getElementById('floating-leaderboard-btn');
+    this.menuLeaderboardBtn = document.getElementById('menu-leaderboard-btn');
+
+    // 결과 모달 DOM
     this.modalOverlay = document.getElementById('game-modal');
     this.modalTitle = document.getElementById('modal-title');
     this.modalMessage = document.getElementById('modal-message');
     this.modalStats = document.getElementById('modal-stats');
     this.modalRestartBtn = document.getElementById('modal-restart-btn');
     this.modalCloseBtn = document.getElementById('modal-close-btn');
+    this.modalTitleCloseBtn = document.getElementById('modal-title-close-btn');
+    this.modalLeaderboardBtn = document.getElementById('modal-leaderboard-btn');
+
+    // 기록 등록 폼 DOM
+    this.recordFormSection = document.getElementById('record-form-section');
+    this.playerNameInput = document.getElementById('player-name-input');
+    this.recordSubmitBtn = document.getElementById('record-submit-btn');
+    this.recordFeedback = document.getElementById('record-feedback');
+
+    // 순위표 모달 DOM
+    this.leaderboardModal = document.getElementById('leaderboard-modal');
+    this.leaderboardCloseX = document.getElementById('leaderboard-close-x');
+    this.leaderboardCloseBtn = document.getElementById('leaderboard-close-btn');
+    this.leaderboardClearBtn = document.getElementById('leaderboard-clear-btn');
+    this.leaderboardTbody = document.getElementById('leaderboard-tbody');
+    this.leaderboardEmpty = document.getElementById('leaderboard-empty');
+    this.leaderboardTabs = document.querySelectorAll('.leaderboard-tabs .tab-btn');
+    this.recordsSidebarList = document.getElementById('records-sidebar-list');
 
     this.initEvents();
     this.startNewGame();
@@ -112,8 +340,61 @@ class Minesweeper {
     this.modalCloseBtn.addEventListener('click', () => {
       this.modalOverlay.classList.add('hidden');
     });
+    if (this.modalTitleCloseBtn) {
+      this.modalTitleCloseBtn.addEventListener('click', () => {
+        this.modalOverlay.classList.add('hidden');
+      });
+    }
 
-    // 8. 마우스 버튼 동시 클릭(Chord) 감지를 위한 전역 이벤트 리스너
+    // 8. 결과 모달 내 순위표 버튼
+    this.modalLeaderboardBtn.addEventListener('click', () => {
+      this.openLeaderboard(this.currentMode);
+    });
+
+    // 9. 순위 등록 이벤트 (버튼 클릭 및 엔터키)
+    this.recordSubmitBtn.addEventListener('click', () => {
+      this.handleRecordSubmit();
+    });
+    this.playerNameInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        this.handleRecordSubmit();
+      }
+    });
+
+    // 10. 플로팅 순위 버튼 & 상단 메뉴 순위 버튼
+    this.floatingLeaderboardBtn.addEventListener('click', () => {
+      this.openLeaderboard(this.currentMode);
+    });
+    if (this.menuLeaderboardBtn) {
+      this.menuLeaderboardBtn.addEventListener('click', () => {
+        this.openLeaderboard(this.currentMode);
+      });
+    }
+
+    // 11. 순위표 모달 닫기
+    this.leaderboardCloseX.addEventListener('click', () => {
+      this.closeLeaderboard();
+    });
+    this.leaderboardCloseBtn.addEventListener('click', () => {
+      this.closeLeaderboard();
+    });
+
+    // 12. 순위표 탭 전환
+    this.leaderboardTabs.forEach((tabBtn) => {
+      tabBtn.addEventListener('click', () => {
+        const targetTab = tabBtn.dataset.tab;
+        this.leaderboardBoardKeyOverride = null;
+        this.switchLeaderboardTab(targetTab);
+      });
+    });
+
+    // 13. 순위표 현재 난이도 초기화
+    this.leaderboardClearBtn.addEventListener('click', () => {
+      this.handleClearLeaderboard();
+    });
+
+    // 14. 마우스 버튼 동시 클릭(Chord) 감지를 위한 전역 이벤트 리스너
     window.addEventListener('mouseup', () => {
       if (this.gameState === 'playing' && this.faceEmoji.textContent === '😮') {
         this.faceEmoji.textContent = '🙂';
@@ -163,8 +444,12 @@ class Minesweeper {
     this.updateMineCounterDisplay();
     this.faceEmoji.textContent = '🙂';
 
+    if (this.modalOverlay) this.modalOverlay.classList.add('hidden');
+    if (this.leaderboardModal) this.leaderboardModal.classList.add('hidden');
+
     this.createBoardData();
     this.renderBoard();
+    this.renderSidebarRecords();
   }
 
   createBoardData() {
@@ -410,6 +695,7 @@ class Minesweeper {
 
     window.soundManager.playFlag();
     this.updateMineCounterDisplay();
+    this.checkWinCondition();
   }
 
   // 열린 숫자 타일 주변 일괄 오픈 (Chord 테크닉)
@@ -475,7 +761,12 @@ class Minesweeper {
   // 승리 조건 체크
   checkWinCondition() {
     const totalTiles = this.width * this.height;
-    if (this.revealedCount === totalTiles - this.totalMines) {
+    const allSafeTilesRevealed = this.revealedCount === totalTiles - this.totalMines;
+    const allMinesFlagged = this.gameState === 'playing'
+      && this.flagCount === this.totalMines
+      && this.board.every((row) => row.every((tile) => !tile.isMine || tile.isFlagged));
+
+    if (allSafeTilesRevealed || allMinesFlagged) {
       this.gameWin();
     }
   }
@@ -484,6 +775,7 @@ class Minesweeper {
   gameWin() {
     this.gameState = 'won';
     this.stopTimer();
+    this.gameEndedAt = new Date();
     this.faceEmoji.textContent = '😎';
     window.soundManager.playWin();
 
@@ -501,21 +793,40 @@ class Minesweeper {
     this.flagCount = this.totalMines;
     this.updateMineCounterDisplay();
 
+    const formattedEndTime = formatDateTime(this.gameEndedAt);
+
     // 승리 모달 표시
     this.modalTitle.textContent = '🎉 승리했습니다!';
     this.modalMessage.textContent = '축하합니다! 모든 지뢰를 무사히 찾아냈습니다.';
     this.modalStats.innerHTML = `
-      <strong>소요 시간:</strong> ${this.timer}초<br>
+      <strong>종료 시각:</strong> ${formattedEndTime}<br>
+      <strong>기록:</strong> ${this.timer}초<br>
+      <strong>게임 종류:</strong> ${getBoardLabel(this.width, this.height)}<br>
       <strong>난이도:</strong> ${this.getDifficultyLabel()}<br>
       <strong>지뢰 개수:</strong> ${this.totalMines}개
     `;
+
+    // 순위 등록 입력창 세팅
+    this.recordFormSection.classList.remove('hidden');
+    const savedName = localStorage.getItem('minesweeper_last_player_name') || '';
+    this.playerNameInput.value = savedName;
+    this.playerNameInput.disabled = false;
+    this.recordSubmitBtn.disabled = false;
+    this.recordFeedback.textContent = '';
+    this.recordFeedback.className = 'record-feedback';
+
     this.modalOverlay.classList.remove('hidden');
+    setTimeout(() => {
+      this.playerNameInput.focus();
+      this.playerNameInput.select();
+    }, 150);
   }
 
   // 게임 오버 (패배)
   gameOver(hitR, hitC) {
     this.gameState = 'lost';
     this.stopTimer();
+    const gameEndedAt = new Date();
     this.faceEmoji.textContent = '😵';
     window.soundManager.playExplode();
 
@@ -541,17 +852,245 @@ class Minesweeper {
       }
     }
 
+    const formattedEndTime = formatDateTime(gameEndedAt);
+
+    // 패배 시 기록 입력창 숨김
+    this.recordFormSection.classList.add('hidden');
+
     // 패배 모달 표시
     setTimeout(() => {
       this.modalTitle.textContent = '💥 게임 오버!';
       this.modalMessage.textContent = '지뢰를 밟았습니다! 다음엔 더 신중하게 도전해 보세요.';
       this.modalStats.innerHTML = `
+        <strong>종료 시각:</strong> ${formattedEndTime}<br>
         <strong>소요 시간:</strong> ${this.timer}초<br>
         <strong>난이도:</strong> ${this.getDifficultyLabel()}<br>
         <strong>오픈한 칸:</strong> ${this.revealedCount} / ${(this.width * this.height - this.totalMines)}
       `;
       this.modalOverlay.classList.remove('hidden');
     }, 600);
+  }
+
+  // 순위 기록 등록
+  handleRecordSubmit() {
+    if (this.recordSubmitBtn.disabled) return;
+
+    let name = this.playerNameInput.value.trim();
+    if (!name) {
+      name = '플레이어';
+    }
+
+    // 이름 캐시
+    try {
+      localStorage.setItem('minesweeper_last_player_name', name);
+    } catch (e) {}
+
+    const recordId = 'rec_' + Date.now();
+    const boardKey = this.getCurrentBoardKey();
+    const boardLabel = getBoardLabel(this.width, this.height);
+    const newRecord = {
+      id: recordId,
+      name: name,
+      time: this.timer,
+      date: formatDateTime(this.gameEndedAt || new Date()),
+      timestamp: (this.gameEndedAt ? this.gameEndedAt.getTime() : Date.now()),
+      boardKey,
+      boardLabel,
+      boardInfo: this.currentMode === 'custom' ? `${this.width}×${this.height} (지뢰 ${this.totalMines}개)` : null
+    };
+
+    const rank = this.leaderboard.addRecord(this.currentMode, newRecord);
+    this.lastSubmittedRecordId = recordId;
+
+    this.playerNameInput.disabled = true;
+    this.recordSubmitBtn.disabled = true;
+
+    const rankEmoji = rank === 1 ? '🥇' : (rank === 2 ? '🥈' : (rank === 3 ? '🥉' : '🎖️'));
+    this.recordFeedback.textContent = `축하합니다! ${rankEmoji} ${rank}위로 순위에 등록되었습니다.`;
+    this.recordFeedback.className = 'record-feedback success';
+    this.renderSidebarRecords();
+
+    // 1.2초 후 순위표를 열어 본인의 기록을 확인
+    setTimeout(() => {
+      this.openLeaderboard(this.currentMode);
+    }, 1200);
+  }
+
+  // 순위표 모달 열기
+  openLeaderboard(mode, boardKeyOverride = null) {
+    const targetMode = mode || this.currentMode;
+    this.leaderboardBoardKeyOverride = boardKeyOverride;
+    this.switchLeaderboardTab(targetMode);
+    this.leaderboardModal.classList.remove('hidden');
+  }
+
+  // 순위표 모달 닫기
+  closeLeaderboard() {
+    this.leaderboardModal.classList.add('hidden');
+  }
+
+  // 순위표 탭 전환
+  switchLeaderboardTab(mode) {
+    this.currentLeaderboardTab = mode;
+    this.leaderboardTabs.forEach((btn) => {
+      btn.classList.toggle('active', btn.dataset.tab === mode);
+    });
+    this.renderLeaderboard(mode);
+  }
+
+  // 순위표 렌더링
+  renderLeaderboard(mode) {
+    const boardKey = this.getBoardKeyForMode(mode);
+    const records = this.leaderboard.getRecordsForBoardKey(boardKey);
+    this.leaderboardTbody.innerHTML = '';
+
+    if (!records || records.length === 0) {
+      this.leaderboardEmpty.classList.remove('hidden');
+      return;
+    }
+
+    this.leaderboardEmpty.classList.add('hidden');
+
+    records.forEach((rec, index) => {
+      const tr = document.createElement('tr');
+      if (this.lastSubmittedRecordId && rec.id === this.lastSubmittedRecordId) {
+        tr.classList.add('new-record-row');
+      }
+
+      // 1~3위 뱃지 이모지
+      let rankText = `${index + 1}위`;
+      let rankClass = '';
+      if (index === 0) {
+        rankText = '🥇 1위';
+        rankClass = 'rank-1';
+      } else if (index === 1) {
+        rankText = '🥈 2위';
+        rankClass = 'rank-2';
+      } else if (index === 2) {
+        rankText = '🥉 3위';
+        rankClass = 'rank-3';
+      }
+
+      const tdRank = document.createElement('td');
+      tdRank.className = `col-rank ${rankClass}`;
+      tdRank.textContent = rankText;
+
+      const tdName = document.createElement('td');
+      tdName.className = 'col-name';
+      tdName.textContent = rec.name;
+      tdName.title = rec.name;
+
+      const tdTime = document.createElement('td');
+      tdTime.className = 'col-time';
+      if (mode === 'custom' && rec.boardInfo) {
+        tdTime.textContent = `${rec.time}초`;
+        tdTime.title = `규격: ${rec.boardInfo}`;
+      } else {
+        tdTime.textContent = `${rec.time}초`;
+      }
+
+      const tdDate = document.createElement('td');
+      tdDate.className = 'col-date';
+      tdDate.textContent = rec.date;
+
+      tr.appendChild(tdRank);
+      tr.appendChild(tdName);
+      tr.appendChild(tdTime);
+      tr.appendChild(tdDate);
+
+      this.leaderboardTbody.appendChild(tr);
+    });
+  }
+
+  // 순위표 현재 난이도 초기화
+  handleClearLeaderboard() {
+    const boardKey = this.getBoardKeyForMode(this.currentLeaderboardTab);
+    const modeLabels = {
+      beginner: '초급',
+      intermediate: '중급',
+      expert: '고급',
+      custom: `사용자 지정 ${getBoardLabelFromKey(boardKey)}`
+    };
+    const label = modeLabels[this.currentLeaderboardTab] || this.currentLeaderboardTab;
+    if (confirm(`정말로 [${label}] 보드의 순위 기록을 모두 초기화하시겠습니까?`)) {
+      this.leaderboard.clearRecords(this.currentLeaderboardTab, boardKey);
+      this.renderLeaderboard(this.currentLeaderboardTab);
+      this.renderSidebarRecords();
+    }
+  }
+
+  renderSidebarRecords() {
+    if (!this.recordsSidebarList) return;
+
+    const groups = this.leaderboard.getGroupedRecords();
+    const currentBoardKey = this.getCurrentBoardKey();
+    this.recordsSidebarList.innerHTML = '';
+
+    if (groups.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'records-empty';
+      empty.textContent = '아직 등록된 기록이 없습니다.';
+      this.recordsSidebarList.appendChild(empty);
+      return;
+    }
+
+    groups.forEach((group) => {
+      const section = document.createElement('section');
+      section.className = 'record-group';
+      section.classList.toggle('active', group.key === currentBoardKey);
+
+      const header = document.createElement('button');
+      header.type = 'button';
+      header.className = 'record-group-title';
+      header.textContent = `${group.label} 기록`;
+      header.addEventListener('click', () => {
+        this.openLeaderboard(this.getModeForBoardKey(group.key), group.key);
+      });
+
+      const list = document.createElement('ol');
+      list.className = 'record-mini-list';
+
+      group.records.forEach((record) => {
+        const item = document.createElement('li');
+
+        const name = document.createElement('span');
+        name.className = 'record-mini-name';
+        name.textContent = record.name;
+        name.title = record.name;
+
+        const time = document.createElement('span');
+        time.className = 'record-mini-time';
+        time.textContent = `${record.time}초`;
+
+        item.title = `${record.date} · ${record.time}초`;
+        item.appendChild(name);
+        item.appendChild(time);
+        list.appendChild(item);
+      });
+
+      section.appendChild(header);
+      section.appendChild(list);
+      this.recordsSidebarList.appendChild(section);
+    });
+  }
+
+  getCurrentBoardKey() {
+    return getBoardKey(this.width, this.height);
+  }
+
+  getBoardKeyForMode(mode) {
+    if (this.leaderboardBoardKeyOverride) return this.leaderboardBoardKeyOverride;
+    if (mode === 'beginner') return getBoardKey(9, 9);
+    if (mode === 'intermediate') return getBoardKey(16, 16);
+    if (mode === 'expert') return getBoardKey(30, 16);
+    return this.getCurrentBoardKey();
+  }
+
+  getModeForBoardKey(boardKey) {
+    if (boardKey === getBoardKey(9, 9)) return 'beginner';
+    if (boardKey === getBoardKey(16, 16)) return 'intermediate';
+    if (boardKey === getBoardKey(30, 16)) return 'expert';
+    return 'custom';
   }
 
   getDifficultyLabel() {
